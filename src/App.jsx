@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import './App.css';
 
 function App() {
   const [selfieImage, setSelfieImage] = useState(null);
@@ -21,7 +22,7 @@ function App() {
     }
   }
 
-  async function takeSelfie() {
+  function takeSelfie() {
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -36,12 +37,8 @@ function App() {
     const selfieDataUrl = canvas.toDataURL('image/png');
     setSelfieImage(selfieDataUrl);
 
-    // Store the selfie in the internal database (localStorage)
-    const storedSelfies = localStorage.getItem('previousSelfies');
-    const updatedSelfies = storedSelfies ? JSON.parse(storedSelfies) : [];
-    updatedSelfies.push(selfieDataUrl);
-    localStorage.setItem('previousSelfies', JSON.stringify(updatedSelfies));
-    setPreviousSelfies(updatedSelfies);
+    // Store the selfie in the local state
+    setPreviousSelfies((prevSelfies) => [...prevSelfies, selfieDataUrl]);
   }
 
   function toggleMirror() {
@@ -49,26 +46,19 @@ function App() {
   }
 
   function deleteSelfie(index) {
-    const updatedSelfies = [...previousSelfies];
-    updatedSelfies.splice(index, 1);
-    localStorage.setItem('previousSelfies', JSON.stringify(updatedSelfies));
-    setPreviousSelfies(updatedSelfies);
+    setPreviousSelfies((prevSelfies) => {
+      const updatedSelfies = [...prevSelfies];
+      updatedSelfies.splice(index, 1);
+      return updatedSelfies;
+    });
   }
-
-  // Load previous selfies from the internal database (localStorage)
-  useEffect(() => {
-    const storedSelfies = localStorage.getItem('previousSelfies');
-    if (storedSelfies) {
-      setPreviousSelfies(JSON.parse(storedSelfies));
-    }
-  }, []);
 
   return (
     <div>
       <h1>React Selfie App</h1>
       <div style={{ position: 'relative', maxWidth: '640px', margin: 'auto' }}>
         <video ref={videoRef} id="video-preview" autoPlay style={{ transform: mirror ? 'scaleX(-1)' : 'none' }} />
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ position: 'absolute', top: 400, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <button onClick={takeSelfie}>Take Selfie</button>
           <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
         </div>
