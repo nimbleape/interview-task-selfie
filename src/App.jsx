@@ -99,9 +99,9 @@ function App() {
             {previousSelfies.map((selfie, index) => (
               <div key={index} style={{ margin: '5px', position: 'relative' }}>
                 <img src={selfie.imageURL} alt={`Selfie ${index}`} style={{ width: '150px' }} />
-                <button onClick={() => deleteSelfie(selfie.key)} style={{ position: 'absolute', top: '5px', right: '5px' }}>
-                  Delete
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button onClick={() => deleteSelfie(selfie.key)}>Delete</button>
+                </div>
               </div>
             ))}
           </div>
