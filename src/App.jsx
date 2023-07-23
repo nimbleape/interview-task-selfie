@@ -41,7 +41,9 @@ function App() {
       setSelfieImage(imageURL);
 
       // Store the image URL in IndexedDB using localforage
-      await localforage.setItem(`selfie_${Date.now()}`, imageURL);
+      // Generate a unique key using Date.now()
+      const key = `selfie_${Date.now()}`;
+      await localforage.setItem(key, imageURL);
 
       // Load previous selfies from IndexedDB and update the state
       loadPreviousSelfies();
@@ -52,25 +54,27 @@ function App() {
     setMirror(!mirror);
   }
 
-  async function deleteSelfie(index) {
-    const imageURL = previousSelfies[index];
-    setPreviousSelfies((prevSelfies) => {
-      const updatedSelfies = [...prevSelfies];
-      updatedSelfies.splice(index, 1);
-      return updatedSelfies;
-    });
-
+  async function deleteSelfie(key) {
     // Remove the image URL from IndexedDB using localforage
-    await localforage.removeItem(imageURL);
+    await localforage.removeItem(key);
+
+    // Load previous selfies from IndexedDB and update the state
+    loadPreviousSelfies();
   }
 
   async function loadPreviousSelfies() {
     const selfieFiles = [];
-    await localforage.iterate((value, key) => {
-      if (key.startsWith('selfie_')) {
-        selfieFiles.push(value);
-      }
-    });
+    const keys = await localforage.keys();
+
+    // Filter the keys to get selfie image keys
+    const selfieKeys = keys.filter((key) => key.startsWith('selfie_'));
+
+    // Retrieve the image URLs based on the selfie image keys
+    for (const key of selfieKeys) {
+      const imageURL = await localforage.getItem(key);
+      selfieFiles.push({ key, imageURL }); // Store the image URLs along with their keys
+    }
+
     setPreviousSelfies(selfieFiles);
   }
 
@@ -94,8 +98,8 @@ function App() {
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
             {previousSelfies.map((selfie, index) => (
               <div key={index} style={{ margin: '5px', position: 'relative' }}>
-                <img src={selfie} alt={`Selfie ${index}`} style={{ width: '150px' }} />
-                <button onClick={() => deleteSelfie(index)} style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                <img src={selfie.imageURL} alt={`Selfie ${index}`} style={{ width: '150px' }} />
+                <button onClick={() => deleteSelfie(selfie.key)} style={{ position: 'absolute', top: '5px', right: '5px' }}>
                   Delete
                 </button>
               </div>
