@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react';
 function App() {
   const [selfieImage, setSelfieImage] = useState(null);
   const [mirror, setMirror] = useState(false);
+  const [previousSelfies, setPreviousSelfies] = useState([]);
+
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -33,11 +35,26 @@ function App() {
     // Get the selfie image data as a base64 string
     const selfieDataUrl = canvas.toDataURL('image/png');
     setSelfieImage(selfieDataUrl);
+
+    // Store the selfie in the internal database (localStorage)
+    const storedSelfies = localStorage.getItem('previousSelfies');
+    const updatedSelfies = storedSelfies ? JSON.parse(storedSelfies) : [];
+    updatedSelfies.push(selfieDataUrl);
+    localStorage.setItem('previousSelfies', JSON.stringify(updatedSelfies));
+    setPreviousSelfies(updatedSelfies);
   }
 
   function toggleMirror() {
     setMirror(!mirror);
   }
+
+  // Load previous selfies from the internal database (localStorage)
+  useEffect(() => {
+    const storedSelfies = localStorage.getItem('previousSelfies');
+    if (storedSelfies) {
+      setPreviousSelfies(JSON.parse(storedSelfies));
+    }
+  }, []);
 
   return (
     <div>
@@ -51,6 +68,18 @@ function App() {
       </div>
       {/* Display the captured selfie */}
       {selfieImage && <img src={selfieImage} alt="Selfie" />}
+
+      {/* List previous selfies */}
+      {previousSelfies.length > 0 && (
+        <div>
+          <h2>Previous Selfies</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {previousSelfies.map((selfie, index) => (
+              <img key={index} src={selfie} alt={`Selfie ${index}`} style={{ width: '150px', margin: '5px' }} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
