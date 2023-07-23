@@ -48,6 +48,13 @@ function App() {
     setMirror(!mirror);
   }
 
+  function deleteSelfie(index) {
+    const updatedSelfies = [...previousSelfies];
+    updatedSelfies.splice(index, 1);
+    localStorage.setItem('previousSelfies', JSON.stringify(updatedSelfies));
+    setPreviousSelfies(updatedSelfies);
+  }
+
   // Load previous selfies from the internal database (localStorage)
   useEffect(() => {
     const storedSelfies = localStorage.getItem('previousSelfies');
@@ -75,7 +82,12 @@ function App() {
           <h2>Previous Selfies</h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
             {previousSelfies.map((selfie, index) => (
-              <img key={index} src={selfie} alt={`Selfie ${index}`} style={{ width: '150px', margin: '5px' }} />
+              <div key={index} style={{ margin: '5px', position: 'relative' }}>
+                <img src={selfie} alt={`Selfie ${index}`} style={{ width: '150px' }} />
+                <button onClick={() => deleteSelfie(index)} style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                  Delete
+                </button>
+              </div>
             ))}
           </div>
         </div>
