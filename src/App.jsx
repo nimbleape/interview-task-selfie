@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import localforage from 'localforage'; // import localforage
 
 function App() {
   const [selfieImage, setSelfieImage] = useState(null);
@@ -10,6 +11,7 @@ function App() {
 
   useEffect(() => {
     startCamera();
+    loadPreviousSelfies();
   }, []);
 
   async function startCamera() {
@@ -33,24 +35,43 @@ function App() {
     }
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Get the selfie image data as a base64 string
-    const selfieDataUrl = canvas.toDataURL('image/png');
-    setSelfieImage(selfieDataUrl);
+    // Get the selfie image data as a blob
+    canvas.toBlob(async (blob) => {
+      const imageURL = URL.createObjectURL(blob);
+      setSelfieImage(imageURL);
 
-    // Store the selfie in the local state
-    setPreviousSelfies((prevSelfies) => [...prevSelfies, selfieDataUrl]);
+      // Store the image URL in IndexedDB using localforage
+      await localforage.setItem(`selfie_${Date.now()}`, imageURL);
+
+      // Load previous selfies from IndexedDB and update the state
+      loadPreviousSelfies();
+    }, 'image/png');
   }
 
   function toggleMirror() {
     setMirror(!mirror);
   }
 
-  function deleteSelfie(index) {
+  async function deleteSelfie(index) {
+    const imageURL = previousSelfies[index];
     setPreviousSelfies((prevSelfies) => {
       const updatedSelfies = [...prevSelfies];
       updatedSelfies.splice(index, 1);
       return updatedSelfies;
     });
+
+    // Remove the image URL from IndexedDB using localforage
+    await localforage.removeItem(imageURL);
+  }
+
+  async function loadPreviousSelfies() {
+    const selfieFiles = [];
+    await localforage.iterate((value, key) => {
+      if (key.startsWith('selfie_')) {
+        selfieFiles.push(value);
+      }
+    });
+    setPreviousSelfies(selfieFiles);
   }
 
   return (
