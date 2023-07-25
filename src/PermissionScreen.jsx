@@ -26,12 +26,18 @@ const PermissionScreen = ({ onPermissionGranted }) => {
       onPermissionGranted();
     } catch (error) {
       console.error('Error accessing the camera:', error);
+      setPermissionStatus('denied');
     }
   };
 
   return (
-    <div>
-      {permissionStatus === 'denied' ? (
+    <div className="permission-screen">
+      {permissionStatus === 'undetermined' ? (
+        <div>
+          <p>Please grant permission to access your camera to use this app.</p>
+          <button onClick={requestPermission}>Grant Camera Permission</button>
+        </div>
+      ) : permissionStatus === 'denied' ? (
         <div>
           <p>Camera access is denied. Please grant permission to access your camera.</p>
           <button onClick={requestPermission}>Grant Camera Permission</button>
