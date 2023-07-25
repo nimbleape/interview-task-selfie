@@ -9,7 +9,7 @@ To run the React Selfie App, follow these steps:
 1. Clone this repository to your local machine.
 
 ```bash
-git clone https://github.com/nimbleape/amir-task.git
+git clone <repository-url>
 ```
 
 2. Install the dependencies using npm or yarn.
@@ -17,16 +17,12 @@ git clone https://github.com/nimbleape/amir-task.git
 ```bash
 cd react-selfie-app
 npm install
-# or
-yarn install
 ```
 
 3. Start the development server.
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
 4. Open your web browser and navigate to localhost:port to access the app(you'll see the port in your terminal).
