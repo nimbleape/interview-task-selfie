@@ -1,18 +1,28 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import localforage from 'localforage'; // import localforage
+import classNames from 'classnames';
+import localforage from 'localforage';
+import SelfieItem from './SelfieItem';
+import PermissionScreen from './PermissionScreen';
 
 function App() {
   const [selfieImage, setSelfieImage] = useState(null);
   const [mirror, setMirror] = useState(false);
   const [previousSelfies, setPreviousSelfies] = useState([]);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
 
   const videoRef = useRef(null);
 
   useEffect(() => {
-    startCamera();
-    loadPreviousSelfies();
-  }, []);
+    if (cameraPermissionGranted) {
+      startCamera();
+      loadPreviousSelfies();
+    }
+  }, [cameraPermissionGranted]);
+
+  const handlePermissionGranted = () => {
+    setCameraPermissionGranted(true);
+  };
 
   async function startCamera() {
     try {
@@ -20,7 +30,7 @@ function App() {
       videoRef.current.srcObject = stream;
       videoRef.current.play(); // Start playing the video
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('Error accessing the camera:', error);
     }
   }
 
@@ -80,31 +90,32 @@ function App() {
 
   return (
     <div>
-      <h1>React Selfie App</h1>
-      <div style={{ position: 'relative', maxWidth: '640px', margin: 'auto' }}>
-        <video ref={videoRef} id="video-preview" autoPlay style={{ transform: mirror ? 'scaleX(-1)' : 'none' }} />
-        <div style={{ position: 'absolute', top: 400, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <button onClick={takeSelfie}>Take Selfie</button>
-          <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
-        </div>
-      </div>
-      {/* Display the captured selfie */}
-      {selfieImage && <img src={selfieImage} alt="Selfie" />}
-
-      {/* List previous selfies */}
-      {previousSelfies.length > 0 && (
+      {!cameraPermissionGranted ? (
+        <PermissionScreen onPermissionGranted={handlePermissionGranted} />
+      ) : (
         <div>
-          <h2>Previous Selfies</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {previousSelfies.map((selfie, index) => (
-              <div key={index} style={{ margin: '5px', position: 'relative' }}>
-                <img src={selfie.imageURL} alt={`Selfie ${index}`} style={{ width: '150px' }} />
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <button onClick={() => deleteSelfie(selfie.key)}>Delete</button>
-                </div>
-              </div>
-            ))}
+          <h1>React Selfie App</h1>
+          <div className={classNames('selfie-container', { 'mirror': mirror })}>
+            <div className="controls">
+              <button onClick={takeSelfie}>Take Selfie</button>
+              <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
+            </div>
           </div>
+          <video ref={videoRef} id="video-preview" autoPlay />
+          {/* Display the captured selfie */}
+          {selfieImage && <img src={selfieImage} alt="Selfie" />}
+
+          {/* List previous selfies */}
+          {previousSelfies.length > 0 && (
+            <div>
+              <h2>Previous Selfies</h2>
+              <div className="previous-selfies">
+                {previousSelfies.map((selfie, index) => (
+                  <SelfieItem key={index} selfie={selfie} onDelete={deleteSelfie} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
