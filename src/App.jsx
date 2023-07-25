@@ -10,13 +10,21 @@ function App() {
   const [mirror, setMirror] = useState(false);
   const [previousSelfies, setPreviousSelfies] = useState([]);
   const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+  const [cameras, setCameras] = useState([]);
+  const [selectedCamera, setSelectedCamera] = useState(null);
 
   const videoRef = useRef(null);
 
   useEffect(() => {
     if (cameraPermissionGranted) {
-      startCamera();
+      startCamera(selectedCamera?.deviceId);
       loadPreviousSelfies();
+    }
+  }, [cameraPermissionGranted, selectedCamera]);
+
+  useEffect(() => {
+    if (cameraPermissionGranted) {
+      getAvailableCameras();
     }
   }, [cameraPermissionGranted]);
 
@@ -24,13 +32,28 @@ function App() {
     setCameraPermissionGranted(true);
   };
 
-  async function startCamera() {
+  async function startCamera(deviceId) {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+        },
+      });
       videoRef.current.srcObject = stream;
       videoRef.current.play(); // Start playing the video
     } catch (error) {
       console.error('Error accessing the camera:', error);
+    }
+  }
+
+  async function getAvailableCameras() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+      setCameras(videoDevices);
+      setSelectedCamera(videoDevices[0]); // Select the first camera by default
+    } catch (error) {
+      console.error('Error enumerating devices:', error);
     }
   }
 
@@ -99,6 +122,21 @@ function App() {
             <div className="controls">
               <button onClick={takeSelfie}>Take Selfie</button>
               <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
+              {/* Dropdown menu to select the camera */}
+              <select
+                value={selectedCamera?.deviceId || ''}
+                onChange={(e) => {
+                  const deviceId = e.target.value;
+                  const selectedCam = cameras.find((cam) => cam.deviceId === deviceId);
+                  setSelectedCamera(selectedCam);
+                }}
+              >
+                {cameras.map((camera) => (
+                  <option key={camera.deviceId} value={camera.deviceId}>
+                    {camera.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <video ref={videoRef} id="video-preview" autoPlay className={classNames({ 'mirror': mirror })} />
