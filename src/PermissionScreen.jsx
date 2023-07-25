@@ -18,10 +18,24 @@ const PermissionScreen = ({ onPermissionGranted }) => {
     }
   };
 
+  const requestPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach((track) => track.stop());
+      setPermissionStatus('granted');
+      onPermissionGranted();
+    } catch (error) {
+      console.error('Error accessing the camera:', error);
+    }
+  };
+
   return (
     <div>
       {permissionStatus === 'denied' ? (
-        <p>Camera access is denied. Please grant permission to access your camera.</p>
+        <div>
+          <p>Camera access is denied. Please grant permission to access your camera.</p>
+          <button onClick={requestPermission}>Grant Camera Permission</button>
+        </div>
       ) : null}
     </div>
   );
