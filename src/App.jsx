@@ -141,7 +141,7 @@ function App() {
           </div>
           <video ref={videoRef} id="video-preview" autoPlay className={classNames({ 'mirror': mirror })} />
           {/* Display the captured selfie */}
-          {selfieImage && <img src={selfieImage} alt="Selfie" />}
+          {selfieImage && <img src={selfieImage} id="selfi-preview" alt="Selfie" />}
 
           {/* List previous selfies */}
           {previousSelfies.length > 0 && (
