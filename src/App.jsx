@@ -95,13 +95,13 @@ function App() {
       ) : (
         <div>
           <h1>React Selfie App</h1>
-          <div className={classNames('selfie-container', { 'mirror': mirror })}>
+          <div className="selfie-container">
             <div className="controls">
               <button onClick={takeSelfie}>Take Selfie</button>
               <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
             </div>
           </div>
-          <video ref={videoRef} id="video-preview" autoPlay />
+          <video ref={videoRef} id="video-preview" autoPlay className={classNames({ 'mirror': mirror })} />
           {/* Display the captured selfie */}
           {selfieImage && <img src={selfieImage} alt="Selfie" />}
 
