@@ -9,23 +9,28 @@ const PermissionScreen = ({ onPermissionGranted }) => {
 
   const checkCameraPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((track) => track.stop());
+      // Try accessing the camera to check the permission
+      await navigator.mediaDevices.getUserMedia({ video: true });
       setPermissionStatus('granted');
       onPermissionGranted();
     } catch (error) {
-      setPermissionStatus('denied');
+      if (error.name === 'NotAllowedError') {
+        setPermissionStatus('denied');
+      } else {
+        console.error('Error checking camera permission:', error);
+        setPermissionStatus('undetermined');
+      }
     }
   };
 
   const requestPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((track) => track.stop());
+      // Request camera permission by accessing the camera
+      await navigator.mediaDevices.getUserMedia({ video: true });
       setPermissionStatus('granted');
       onPermissionGranted();
     } catch (error) {
-      console.error('Error accessing the camera:', error);
+      console.error('Error requesting camera permission:', error);
       setPermissionStatus('denied');
     }
   };
