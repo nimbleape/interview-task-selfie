@@ -9,18 +9,19 @@ const PermissionScreen = ({ onPermissionGranted }) => {
 
   const checkCameraPermission = async () => {
     try {
-      // Try accessing the camera to check the permission
-      await navigator.mediaDevices.getUserMedia({ video: true });
-      setPermissionStatus('granted');
-      onPermissionGranted();
+      //ask the permissions api whether we have camera permissions
+      const res = await navigator.permissions.query({ name: 'camera' });
+      if (res.state === 'granted') {
+          setPermissionStatus('granted');
+          onPermissionGranted();
+      } else if (res.state === 'prompt') {
+          // doesnt have permission
+          setPermissionStatus('undetermined');
+      }
     } catch (error) {
-      if (error.name === 'NotAllowedError') {
-        setPermissionStatus('denied');
-      } else {
         console.error('Error checking camera permission:', error);
         setPermissionStatus('undetermined');
       }
-    }
   };
 
   const requestPermission = async () => {
