@@ -1,3 +1,5 @@
+/* App.css */
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -11,9 +13,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -48,6 +52,32 @@
   margin-top: 20px;
 }
 
+/* Update the selfie-container to display flex in column layout on small screens */
+@media (max-width: 768px) {
+  .selfie-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Update the video element to fit the width of the container on small screens */
+@media (max-width: 768px) {
+  #video-preview {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+}
+
+/* Update the selfi element to fit the width of the container on small screens */
+@media (max-width: 768px) {
+  #selfi-preview {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+}
+
 .selfie-wrapper {
   border: 1px solid #ccc;
   margin: 10px;
@@ -62,4 +92,33 @@
 /* mirror class to flip the image horizontally */
 .mirror {
   transform: scaleX(-1);
+}
+
+/* New styles for permission screen */
+.permission-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.permission-screen p {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.permission-screen button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #61dafb;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.permission-screen button:hover {
+  background-color: #007bff;
 }

@@ -1,27 +1,63 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import './App.css';
+import classNames from 'classnames';
+import localforage from 'localforage';
+import SelfieItem from './SelfieItem';
+import PermissionScreen from './PermissionScreen';
 
 function App() {
   const [selfieImage, setSelfieImage] = useState(null);
   const [mirror, setMirror] = useState(false);
   const [previousSelfies, setPreviousSelfies] = useState([]);
+  const [cameraPermissionGranted, setCameraPermissionGranted] = useState(false);
+  const [cameras, setCameras] = useState([]);
+  const [selectedCamera, setSelectedCamera] = useState(null);
 
   const videoRef = useRef(null);
 
   useEffect(() => {
-    startCamera();
-  }, []);
+    if (cameraPermissionGranted) {
+      startCamera(selectedCamera?.deviceId);
+      loadPreviousSelfies();
+    }
+  }, [cameraPermissionGranted, selectedCamera]);
 
-  async function startCamera() {
+  useEffect(() => {
+    if (cameraPermissionGranted) {
+      getAvailableCameras();
+    }
+  }, [cameraPermissionGranted]);
+
+  const handlePermissionGranted = () => {
+    setCameraPermissionGranted(true);
+  };
+
+  async function startCamera(deviceId) {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: deviceId ? { exact: deviceId } : undefined,
+        },
+      });
       videoRef.current.srcObject = stream;
       videoRef.current.play(); // Start playing the video
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('Error accessing the camera:', error);
     }
   }
 
-  async function takeSelfie() {
+  async function getAvailableCameras() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+      setCameras(videoDevices);
+      setSelectedCamera(videoDevices[0]); // Select the first camera by default
+    } catch (error) {
+      console.error('Error enumerating devices:', error);
+    }
+  }
+
+  function takeSelfie() {
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
@@ -32,64 +68,92 @@ function App() {
     }
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    // Get the selfie image data as a base64 string
-    const selfieDataUrl = canvas.toDataURL('image/png');
-    setSelfieImage(selfieDataUrl);
+    // Get the selfie image data as a blob
+    canvas.toBlob(async (blob) => {
+      const imageURL = URL.createObjectURL(blob);
+      setSelfieImage(imageURL);
 
-    // Store the selfie in the internal database (localStorage)
-    const storedSelfies = localStorage.getItem('previousSelfies');
-    const updatedSelfies = storedSelfies ? JSON.parse(storedSelfies) : [];
-    updatedSelfies.push(selfieDataUrl);
-    localStorage.setItem('previousSelfies', JSON.stringify(updatedSelfies));
-    setPreviousSelfies(updatedSelfies);
+      // Store the image URL in IndexedDB using localforage
+      // Generate a unique key using Date.now()
+      const key = `selfie_${Date.now()}`;
+      await localforage.setItem(key, imageURL);
+
+      // Load previous selfies from IndexedDB and update the state
+      loadPreviousSelfies();
+    }, 'image/png');
   }
 
   function toggleMirror() {
     setMirror(!mirror);
   }
 
-  function deleteSelfie(index) {
-    const updatedSelfies = [...previousSelfies];
-    updatedSelfies.splice(index, 1);
-    localStorage.setItem('previousSelfies', JSON.stringify(updatedSelfies));
-    setPreviousSelfies(updatedSelfies);
+  async function deleteSelfie(key) {
+    // Remove the image URL from IndexedDB using localforage
+    await localforage.removeItem(key);
+
+    // Load previous selfies from IndexedDB and update the state
+    loadPreviousSelfies();
   }
 
-  // Load previous selfies from the internal database (localStorage)
-  useEffect(() => {
-    const storedSelfies = localStorage.getItem('previousSelfies');
-    if (storedSelfies) {
-      setPreviousSelfies(JSON.parse(storedSelfies));
+  async function loadPreviousSelfies() {
+    const selfieFiles = [];
+    const keys = await localforage.keys();
+
+    // Filter the keys to get selfie image keys
+    const selfieKeys = keys.filter((key) => key.startsWith('selfie_'));
+
+    // Retrieve the image URLs based on the selfie image keys
+    for (const key of selfieKeys) {
+      const imageURL = await localforage.getItem(key);
+      selfieFiles.push({ key, imageURL }); // Store the image URLs along with their keys
     }
-  }, []);
+
+    setPreviousSelfies(selfieFiles);
+  }
 
   return (
     <div>
-      <h1>React Selfie App</h1>
-      <div style={{ position: 'relative', maxWidth: '640px', margin: 'auto' }}>
-        <video ref={videoRef} id="video-preview" autoPlay style={{ transform: mirror ? 'scaleX(-1)' : 'none' }} />
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <button onClick={takeSelfie}>Take Selfie</button>
-          <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
-        </div>
-      </div>
-      {/* Display the captured selfie */}
-      {selfieImage && <img src={selfieImage} alt="Selfie" />}
-
-      {/* List previous selfies */}
-      {previousSelfies.length > 0 && (
+      {!cameraPermissionGranted ? (
+        <PermissionScreen onPermissionGranted={handlePermissionGranted} />
+      ) : (
         <div>
-          <h2>Previous Selfies</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {previousSelfies.map((selfie, index) => (
-              <div key={index} style={{ margin: '5px', position: 'relative' }}>
-                <img src={selfie} alt={`Selfie ${index}`} style={{ width: '150px' }} />
-                <button onClick={() => deleteSelfie(index)} style={{ position: 'absolute', top: '5px', right: '5px' }}>
-                  Delete
-                </button>
-              </div>
-            ))}
+          <h1>React Selfie App</h1>
+          <div className="selfie-container">
+            <div className="controls">
+              <button onClick={takeSelfie}>Take Selfie</button>
+              <button onClick={toggleMirror}>{mirror ? 'Disable Mirror' : 'Enable Mirror'}</button>
+              {/* Dropdown menu to select the camera */}
+              <select
+                value={selectedCamera?.deviceId || ''}
+                onChange={(e) => {
+                  const deviceId = e.target.value;
+                  const selectedCam = cameras.find((cam) => cam.deviceId === deviceId);
+                  setSelectedCamera(selectedCam);
+                }}
+              >
+                {cameras.map((camera) => (
+                  <option key={camera.deviceId} value={camera.deviceId}>
+                    {camera.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+          <video ref={videoRef} id="video-preview" autoPlay className={classNames({ 'mirror': mirror })} />
+          {/* Display the captured selfie */}
+          {selfieImage && <img src={selfieImage} id="selfi-preview" alt="Selfie" />}
+
+          {/* List previous selfies */}
+          {previousSelfies.length > 0 && (
+            <div>
+              <h2>Previous Selfies</h2>
+              <div className="previous-selfies">
+                {previousSelfies.map((selfie, index) => (
+                  <SelfieItem key={index} selfie={selfie} onDelete={deleteSelfie} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
