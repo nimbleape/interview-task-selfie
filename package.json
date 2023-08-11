@@ -1,5 +1,5 @@
 {
-  "name": "amir-task",
+  "name": "interview-task-selfie",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -24,5 +24,10 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "vite": "^4.4.5"
-  }
+  },
+  "description": "Experience the magic of React Selfie App – capture, mirror, and store your moments with modern web technologies. Embrace your creativity and explore the world of selfies in a whole new light!",
+  "main": "index.js",
+  "repository": "https://github.com/nimbleape/interview-task-selfie.git",
+  "author": "@hexfa <amir.dehdarian2009@gmail.com>",
+  "license": "MIT"
 }
