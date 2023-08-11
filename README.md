@@ -1,6 +1,6 @@
 # React Selfie App 📸
 
-Welcome to the React Selfie App, a collaborative creation under the Nimble Ape organization! As a shared endeavor, this repository belongs to all of us, reflecting the collective spirit of exploration and innovation within our team.
+Welcome to the React Selfie App, a collaborative creation from Nimble Ape. As a shared endeavor, this repository belongs to all of us, reflecting the collective spirit of exploration and innovation within our team.
 
 **Note:** This project originated as a technical challenge during an interview process, designed to assess and showcase candidates' technical prowess, creativity, and problem-solving skills. Its purpose was to provide an opportunity for participants to demonstrate their hands-on experience and expertise in React and web development.
 
@@ -16,11 +16,11 @@ The React Selfie App encompasses a variety of component parts, each showcasing e
 
 - **Using Canvas API:** The Canvas API is utilized to manipulate images, applying the mirror effect to captured selfies. [Discover Canvas](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 
-- **Using the Permissions API:** The newer Permissions API is employed to request camera access, enhancing user privacy and security. [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API)
+- **Using the Permissions API:** The newer Permissions API is employed to check if permission has been given to access the camera, enhancing user privacy and security. [Permissions API](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API)
 
 ## Greetings and Introduction 👋
 
-Greetings, future explorer of the React Selfie App! I'm Amir, a passionate software developer, and I'm thrilled to guide you through this captivating endeavor. Prepare to embark on a journey where selfies spring to life, all thanks to the enchanting power of React.
+Greetings, future explorer of the React Selfie App! Prepare to embark on a journey where selfies spring to life, all thanks to the enchanting power of React.
 
 ## Getting Started 🌟
 
@@ -75,6 +75,3 @@ yarn dev
 ## License 📜
 
 This project proudly embraces the MIT License. For a detailed read, consult the [LICENSE](LICENSE) file.
-
-
-Thank you for pointing that out, and I appreciate your understanding. Please let me know if this version meets your requirements or if you need any further adjustments.
