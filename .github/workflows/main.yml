@@ -1,52 +1,47 @@
-name: Build and Deploy to Cloudflare Pages
-
-on:
+on: # trigger on push event and main branch to the repo
   push:
     branches:
-      - main
+      - '**'
+  pull_request:
+  workflow_dispatch: # must be included in your .yml file for manually triggering event
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      deployments: write
+    name: Publish to Cloudflare Pages
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: yarn
+      - run: yarn
+      - run: yarn build
+        env:
+          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          STRAPI_API_URL: ${{ secrets.STRAPI_API_URL }}
+          STRAPI_TOKEN: ${{ secrets.STRAPI_TOKEN }}
+          BASE_URL: ${{ vars.BASE_URL }}
+          PRETALX_API_URL: ${{ secrets.PRETALX_API_URL }}
+          PRETALX_TOKEN: ${{ secrets.PRETALX_TOKEN }}
 
-      - name: Build the project
-        run: yarn build
 
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-artifacts
-          path: build
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-
-      - name: Deploy to Cloudflare Pages
+      - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: bde8664f107f5934b0b7e17cd68e6265
           projectName: selfie-app
-          directory: build
+          directory: public
+          # Optional: Enable this if you want to have GitHub Deployments triggered
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
