@@ -34,6 +34,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: bde8664f107f5934b0b7e17cd68e6265
           projectName: selfie-app
-          directory: .
+          directory: /
           # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
