@@ -58,7 +58,7 @@ yarn dev
 - 📷 **Relive the Magic:** Revisit your previous selfies right from the app interface, and bask in the nostalgia of those picture-perfect moments.
 
 ## Preview 🖼️
-<img src="https://github.com/nimbleape/interview-task-selfie/blob/develop/src/assets/screenshot.png?raw=true" height="650" width="700" alt="React Selfie">
+![React Selfie](src/assets/screenshot.png)
 
 ## How to Shine 🌟
 
