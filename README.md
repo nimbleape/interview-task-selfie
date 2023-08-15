@@ -57,6 +57,9 @@ yarn dev
 
 - 📷 **Relive the Magic:** Revisit your previous selfies right from the app interface, and bask in the nostalgia of those picture-perfect moments.
 
+## Preview 🖼️
+![React Selfie](src/assets/screenshot.png)
+
 ## How to Shine 🌟
 
 1. **Open the React Selfie App:** Launch the app in your web browser of choice.

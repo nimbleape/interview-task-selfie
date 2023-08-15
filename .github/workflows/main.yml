@@ -1,0 +1,39 @@
+on: # trigger on push event and main branch to the repo
+  push:
+    branches:
+      - '**'
+  pull_request:
+  workflow_dispatch: # must be included in your .yml file for manually triggering event
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    name: Publish to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - run: yarn
+      - run: yarn build
+
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: bde8664f107f5934b0b7e17cd68e6265
+          projectName: selfie-app
+          directory: dist
+          # Optional: Enable this if you want to have GitHub Deployments triggered
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
