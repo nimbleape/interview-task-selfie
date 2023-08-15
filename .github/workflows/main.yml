@@ -26,14 +26,6 @@ jobs:
 
       - run: yarn
       - run: yarn build
-        env:
-          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-          STRAPI_API_URL: ${{ secrets.STRAPI_API_URL }}
-          STRAPI_TOKEN: ${{ secrets.STRAPI_TOKEN }}
-          BASE_URL: ${{ vars.BASE_URL }}
-          PRETALX_API_URL: ${{ secrets.PRETALX_API_URL }}
-          PRETALX_TOKEN: ${{ secrets.PRETALX_TOKEN }}
 
 
       - name: Publish to Cloudflare Pages
